@@ -214,3 +214,16 @@ function downloadPDF() {
 
     html2pdf().set(opt).from(printElement).save();
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    
+    if (categoryParam) {
+        const input = document.getElementById('category-input');
+        if (input) {
+            input.value = categoryParam;
+            generateAI();
+        }
+    }
+});

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Themes | WordGen</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">🧩 WordGen</a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/themes" class="active">Themes</a></li>
+            <li><a href="/about">About</a></li>
+        </ul>
+    </nav>
+
+    <header class="hero">
+        <h1>Browse Themes</h1>
+        <p>Select a category to jump straight into generating a puzzle.</p>
+    </header>
+
+    <div class="huge-theme-grid">
+        <div class="theme-card" onclick="selectTheme('Transportation')">🚂 Transportation</div>
+        <div class="theme-card" onclick="selectTheme('Dinosaurs')">🦖 Dinosaurs</div>
+        <div class="theme-card" onclick="selectTheme('Space')">🚀 Space</div>
+        <div class="theme-card" onclick="selectTheme('Geography')">🌎 Geography</div>
+        <div class="theme-card" onclick="selectTheme('Programming')">🐍 Programming</div>
+        <div class="theme-card" onclick="selectTheme('Basketball')">🏀 Basketball</div>
+        <div class="theme-card" onclick="selectTheme('History')">🏰 History</div>
+        <div class="theme-card" onclick="selectTheme('Animals')">🐶 Animals</div>
+    </div>
+
+    <script>
+        function selectTheme(theme) {
+            window.location.href = `/?category=${encodeURIComponent(theme)}`;
+        }
+    </script>
+</body>
+</html>

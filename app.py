@@ -15,6 +15,14 @@ class WordList(BaseModel):
 def index():
     return render_template('index.html')
 
+@app.route('/themes')
+def themes():
+    return render_template('themes.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/api/generate-manual', methods=['POST'])
 def generate_manual():
     data = request.get_json()
@@ -37,7 +45,7 @@ def generate_ai():
         return jsonify({"error": "No category provided"}), 400
 
     try:
-        prompt = f"Generate 10 single words related to the category: '{category}'. If too niche, fall back to the closest broad category."
+        prompt = f"Generate 10 single words related to the category: '{category}'."
         completion = client.chat.completions.create(
             model="openai/gpt-oss-20b",
             messages=[
