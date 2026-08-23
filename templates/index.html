@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordGen | AI Word Search</title>
+    <link rel="icon" type="image/svg+xml" href="/static/logo.svg">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/static/script.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo" onclick="showPage('home')" style="cursor: pointer;">🧩 WordGen</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showPage('home')">Home</a></li>
+            <li><a href="#" onclick="showPage('themes')">Themes</a></li>
+            <li><a href="#" onclick="showPage('about')">About</a></li>
+        </ul>
+    </nav>
+
+    <!-- PAGE: HOME -->
+    <div id="page-home" class="page-content active">
+        <header class="hero">
+            <h1>Word Search Generator</h1>
+            <p>Create printable puzzles in seconds.</p>
+        </header>
+
+        <div class="main-layout">
+            <div class="controls-section">
+                <div class="card">
+                    <h3>🚂 Generate from Topic</h3>
+                    <input type="text" id="category-input" placeholder="Enter a category (e.g., Space)">
+                    <button type="button" onclick="generateAI()">Generate Puzzle</button>
+                </div>
+
+                <div class="card">
+                    <h3>📝 Manual Input</h3>
+                    <textarea id="manual-words" placeholder="Words separated by commas..."></textarea>
+                    <button type="button" class="alt-btn" onclick="generateManual()">Generate Manual</button>
+                </div>
+
+                <div class="card global-stats">
+                    <h3>📊 WordGen Stats</h3>
+                    <div class="stat-row"><span>Puzzles Generated:</span> <strong>124,592+</strong></div>
+                    <div class="stat-row"><span>Categories:</span> <strong>500+</strong></div>
+                    <div class="stat-row"><span>PDF Downloads:</span> <strong>Free</strong></div>
+                </div>
+            </div>
+
+            <div class="puzzle-section">
+                <p id="loading-message" style="display: none;">🤖 AI is generating your puzzle...</p>
+                <div id="print-area" class="puzzle-container" style="display: none;">
+                    <div class="puzzle-stats">
+                        <span class="stat-badge" id="stat-size">Size: 12x12</span>
+                        <span class="stat-badge" id="stat-difficulty">Difficulty: Medium</span>
+                        <span class="stat-badge" id="stat-words">Words: 0</span>
+                    </div>
+                    <div id="grid-container" class="grid"></div>
+                    <div class="words-wrapper">
+                        <h3>Words to Find:</h3>
+                        <ul id="word-list" class="word-list"></ul>
+                    </div>
+                </div>
+                <button id="download-btn" class="download-btn" style="display: none;" onclick="downloadPDF()">⬇️ Download as PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE: THEMES -->
+    <div id="page-themes" class="page-content">
+        <header class="hero">
+            <h1>Browse Themes</h1>
+            <p>Select a category and customize your puzzle.</p>
+        </header>
+        
+        <div class="theme-settings card" style="max-width: 600px; margin: 0 auto 40px auto;">
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <div>
+                    <label><strong>Difficulty:</strong></label>
+                    <select id="theme-difficulty">
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+                <div>
+                    <label><strong>Size:</strong></label>
+                    <select id="theme-size">
+                        <option value="10">10x10</option>
+                        <option value="12" selected>12x12</option>
+                        <option value="15">15x15</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="huge-theme-grid">
+            <div class="theme-card" onclick="generateFromTheme('Transportation')">🚂 Transportation</div>
+            <div class="theme-card" onclick="generateFromTheme('Dinosaurs')">🦖 Dinosaurs</div>
+            <div class="theme-card" onclick="generateFromTheme('Space')">🚀 Space</div>
+            <div class="theme-card" onclick="generateFromTheme('Geography')">🌎 Geography</div>
+            <div class="theme-card" onclick="generateFromTheme('Programming')">🐍 Programming</div>
+            <div class="theme-card" onclick="generateFromTheme('Basketball')">🏀 Basketball</div>
+            <div class="theme-card" onclick="generateFromTheme('History')">🏰 History</div>
+            <div class="theme-card" onclick="generateFromTheme('Animals')">🐶 Animals</div>
+        </div>
+    </div>
+
+    <!-- PAGE: ABOUT -->
+    <div id="page-about" class="page-content">
+        <div class="about-container card">
+            <h1>About WordGen</h1>
+            <p class="about-lead">WordGen helps students, teachers, and puzzle enthusiasts create printable word searches in seconds.</p>
+            
+            <hr>
+            
+            <h3>Features</h3>
+            <ul class="feature-list">
+                <li>✓ AI-generated themes</li>
+                <li>✓ Manual word input</li>
+                <li>✓ Professional PDF export</li>
+                <li>✓ Answer keys included</li>
+                <li>✓ 100% Free and Fast</li>
+            </ul>
+
+            <hr>
+
+            <h3>Why I Built This</h3>
+            <p>WordGen started as a personal project to make creating educational word searches faster and easier. Instead of manually typing out grids and hiding words, this AI-powered tool does all the heavy lifting instantly. It's designed to look beautiful on screen and print perfectly on paper.</p>
+        </div>
+    </div>
+</body>
+</html>
