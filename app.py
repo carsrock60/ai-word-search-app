@@ -44,6 +44,8 @@ def generate_ai():
                 {"role": "system", "content": f"You generate word search lists. Respond with JSON matching: {json.dumps(WordList.model_json_schema())}"},
                 {"role": "user", "content": prompt}
             ],
+            tool_choice="required",
+            tools=[{"type": "web_search"}],
             response_format={"type": "json_object"}
         )
         validated_data = WordList.model_validate_json(completion.choices[0].message.content)
