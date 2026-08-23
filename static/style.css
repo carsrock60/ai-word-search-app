@@ -151,3 +151,51 @@ button:hover { background-color: #2563eb; transform: translateY(-2px); }
 .about-lead { font-size: 20px; color: #475569; line-height: 1.5; }
 .feature-list { list-style: none; padding: 0; font-size: 18px; line-height: 1.8; color: #334155; }
 hr { border: none; border-top: 2px dashed #e2e8f0; margin: 30px 0; }
+
+/* About Page Feature Cards */
+.feature-card {
+    font-size: 18px;
+    padding: 25px 15px;
+    cursor: default;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+}
+
+.feature-card:hover {
+    transform: none;
+    border-color: transparent;
+    color: #1e293b;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+}
+
+/* Story Card matching the Theme design */
+.about-story-card {
+    background: white;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.about-story-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-color: #3b82f6;
+}
+
+.about-story-card h2 {
+    font-size: 28px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #0f172a;
+}
+
+.about-story-card p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #475569;
+    margin: 0;
+}
