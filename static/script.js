@@ -156,7 +156,7 @@ function downloadPDF() {
 
                 <!-- Footer Branding -->
                 <div style="position: absolute; bottom: 30px; left: 0; width: 100%; text-align: center; color: #64748b; font-size: 14px;">
-                    <strong>Generated with WordGen</strong><br>wordgen.com
+                    <strong>Generated with WordGen</strong><br>wordgen-now.vercel.app
                 </div>
             </div>
         </div>
