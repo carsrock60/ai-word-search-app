@@ -1,0 +1,17 @@
+{
+  "name": "WordGen - Word Search",
+  "short_name": "WordGen",
+  "description": "Create printable word search puzzles in seconds.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/static/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
