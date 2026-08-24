@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Themes | WordGen</title>
-    <link rel="icon" type="image/svg+xml" href="/static/logo.png">
+    <title>WordGen | Themes</title>
+    <link rel="icon" type="image/png" href="/static/logo.png">
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="WordGen">
 </head>
 <body>
     <nav class="navbar">
-        <a href="/" class="logo">🧩 WordGen</a>
+        <a href="/" class="logo" style="text-decoration: none;">🧩 WordGen</a>
         <ul class="nav-links">
             <li><a href="/">Home</a></li>
             <li><a href="/themes" class="active">Themes</a></li>
@@ -17,25 +22,114 @@
         </ul>
     </nav>
 
-    <header class="hero">
-        <h1>Browse Themes</h1>
-        <p>Select a category to jump straight into generating a puzzle.</p>
-    </header>
+    <!-- PAGE: THEMES -->
+    <div id="page-themes" class="page-content active">
+        <header class="hero">
+            <h1>Browse Themes</h1>
+            <p>Select a category and customize your puzzle.</p>
+        </header>
+        
+        <div class="theme-settings card" style="max-width: 600px; margin: 0 auto 40px auto;">
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <div>
+                    <label><strong>Difficulty:</strong></label>
+                    <select id="theme-difficulty">
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+                <div>
+                    <label><strong>Size:</strong></label>
+                    <select id="theme-size">
+                        <option value="10">10x10</option>
+                        <option value="12" selected>12x12</option>
+                        <option value="15">15x15</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-    <div class="huge-theme-grid">
-        <div class="theme-card" onclick="selectTheme('Transportation')">🚂 Transportation</div>
-        <div class="theme-card" onclick="selectTheme('Dinosaurs')">🦖 Dinosaurs</div>
-        <div class="theme-card" onclick="selectTheme('Space')">🚀 Space</div>
-        <div class="theme-card" onclick="selectTheme('Geography')">🌎 Geography</div>
-        <div class="theme-card" onclick="selectTheme('Programming')">🐍 Programming</div>
-        <div class="theme-card" onclick="selectTheme('Basketball')">🏀 Basketball</div>
-        <div class="theme-card" onclick="selectTheme('History')">🏰 History</div>
-        <div class="theme-card" onclick="selectTheme('Animals')">🐶 Animals</div>
+        <div class="huge-theme-grid">
+            <!-- STEM & Academics -->
+            <div class="theme-card" onclick="selectTheme('Science')">🔬 Science</div>
+            <div class="theme-card" onclick="selectTheme('Math')">📐 Math</div>
+            <div class="theme-card" onclick="selectTheme('Chemistry')">🧪 Chemistry</div>
+            <div class="theme-card" onclick="selectTheme('Biology')">🧬 Biology</div>
+            <div class="theme-card" onclick="selectTheme('Astronomy')">🔭 Astronomy</div>
+            <div class="theme-card" onclick="selectTheme('Robotics')">🤖 Robotics</div>
+            <div class="theme-card" onclick="selectTheme('Engineering')">⚙️ Engineering</div>
+            <div class="theme-card" onclick="selectTheme('Literature')">📚 Literature</div>
+            <div class="theme-card" onclick="selectTheme('Languages')">🗣️ Languages</div>
+
+            <!-- Arts, Music & Entertainment -->
+            <div class="theme-card" onclick="selectTheme('Art')">🎨 Art</div>
+            <div class="theme-card" onclick="selectTheme('Music')">🎵 Music</div>
+            <div class="theme-card" onclick="selectTheme('Film')">🎬 Film</div>
+            <div class="theme-card" onclick="selectTheme('Photography')">📷 Photography</div>
+            <div class="theme-card" onclick="selectTheme('Theater')">🎭 Theater</div>
+            <div class="theme-card" onclick="selectTheme('Dance')">💃 Dance</div>
+            <div class="theme-card" onclick="selectTheme('Video Games')">🎮 Video Games</div>
+            <div class="theme-card" onclick="selectTheme('Magic Tricks')">🎩 Magic Tricks</div>
+            <div class="theme-card" onclick="selectTheme('Board Games')">🎲 Board Games</div>
+
+            <!-- Nature & Environment -->
+            <div class="theme-card" onclick="selectTheme('Ocean')">🌊 Ocean</div>
+            <div class="theme-card" onclick="selectTheme('Nature')">🌲 Nature</div>
+            <div class="theme-card" onclick="selectTheme('Weather')">🌦️ Weather</div>
+            <div class="theme-card" onclick="selectTheme('Plants')">🌻 Plants</div>
+            <div class="theme-card" onclick="selectTheme('Insects')">🦋 Insects</div>
+            <div class="theme-card" onclick="selectTheme('Birds')">🦜 Birds</div>
+            <div class="theme-card" onclick="selectTheme('Volcanoes')">🌋 Volcanoes</div>
+            <div class="theme-card" onclick="selectTheme('Farming')">🚜 Farming</div>
+
+            <!-- Sports & Hobbies -->
+            <div class="theme-card" onclick="selectTheme('Soccer')">⚽ Soccer</div>
+            <div class="theme-card" onclick="selectTheme('Tennis')">🎾 Tennis</div>
+            <div class="theme-card" onclick="selectTheme('Chess')">♟️ Chess</div>
+            <div class="theme-card" onclick="selectTheme('Martial Arts')">🥋 Martial Arts</div>
+            <div class="theme-card" onclick="selectTheme('Skateboarding')">🛹 Skateboarding</div>
+            <div class="theme-card" onclick="selectTheme('Winter Sports')">🏂 Winter Sports</div>
+            <div class="theme-card" onclick="selectTheme('Gymnastics')">🤸 Gymnastics</div>
+            <div class="theme-card" onclick="selectTheme('Fitness')">🏋️ Fitness</div>
+            <div class="theme-card" onclick="selectTheme('Camping')">🏕️ Camping</div>
+
+            <!-- Food & Cooking -->
+            <div class="theme-card" onclick="selectTheme('Food')">🍕 Food</div>
+            <div class="theme-card" onclick="selectTheme('Cooking')">🍳 Cooking</div>
+            <div class="theme-card" onclick="selectTheme('Baking')">🧁 Baking</div>
+            <div class="theme-card" onclick="selectTheme('Fruits')">🍓 Fruits</div>
+
+            <!-- Fantasy, Sci-Fi & Lore -->
+            <div class="theme-card" onclick="selectTheme('Fantasy')">🦄 Fantasy</div>
+            <div class="theme-card" onclick="selectTheme('Sci-Fi')">👽 Sci-Fi</div>
+            <div class="theme-card" onclick="selectTheme('Superheroes')">🦸 Superheroes</div>
+            <div class="theme-card" onclick="selectTheme('Mythology')">🏛️ Mythology</div>
+            <div class="theme-card" onclick="selectTheme('Magic')">🧙 Magic</div>
+            <div class="theme-card" onclick="selectTheme('Mystery')">🕵️ Mystery</div>
+            <div class="theme-card" onclick="selectTheme('Pirates')">🏴‍☠️ Pirates</div>
+            <div class="theme-card" onclick="selectTheme('Supernatural')">👻 Supernatural</div>
+
+            <!-- Life, Careers & Culture -->
+            <div class="theme-card" onclick="selectTheme('Medicine')">🏥 Medicine</div>
+            <div class="theme-card" onclick="selectTheme('Architecture')">🏗️ Architecture</div>
+            <div class="theme-card" onclick="selectTheme('Aviation')">✈️ Aviation</div>
+            <div class="theme-card" onclick="selectTheme('Fashion')">👗 Fashion</div>
+            <div class="theme-card" onclick="selectTheme('Economics')">💰 Economics</div>
+        </div>
     </div>
-
+    
     <script>
         function selectTheme(theme) {
             window.location.href = `/?category=${encodeURIComponent(theme)}`;
+        }
+        
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then(reg => console.log('Service Worker registered!'))
+                .catch(err => console.log('Service Worker registration failed:', err));
+            });
         }
     </script>
 </body>

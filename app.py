@@ -19,6 +19,10 @@ def index():
 def themes():
     return render_template('themes.html')
 
+@app.route('/solve')
+def solve():
+    return render_template('solve.html')
+
 @app.route('/about')
 def about():
     return render_template('about.html')

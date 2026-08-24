@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WordGen | Word Search</title>
-    <link rel="icon" type="image/svg+xml" href="/static/logo.png">
-    <link rel="manifest" href="/static/manifest.json">
+    <title>WordGen | Word Search Generator</title>
+    <link rel="icon" type="image/png" href="/static/logo.png">
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="/static/script.js"></script>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="WordGen">
     <meta name="google-site-verification" content="xhHcs5aEQCgbr4KsO4WaSgIF6ZdfLVK5ss3CNeKLSPY" />
 </head>
 <body>
     <nav class="navbar">
-        <a href="/" class="logo">🧩 WordGen</a>
+        <a href="/" class="logo" style="text-decoration: none;">🧩 WordGen</a>
         <ul class="nav-links">
             <li><a href="/" class="active">Home</a></li>
             <li><a href="/themes">Themes</a></li>
@@ -21,57 +25,65 @@
         </ul>
     </nav>
 
-    <header class="hero">
-        <h1>Word Search Generator</h1>
-        <p>Create printable puzzles in seconds. Powered by AI.</p>
-    </header>
+    <!-- PAGE: HOME -->
+    <div id="page-home" class="page-content active">
+        <header class="hero">
+            <h1>Word Search Generator</h1>
+            <p>Create printable puzzles in seconds.</p>
+        </header>
 
-    <div class="main-layout">
-        <div class="controls-section">
-            <div class="card">
-                <h3>🚂 Generate from Topic</h3>
-                <input type="text" id="category-input" placeholder="Enter a category (e.g., Space)">
-                <button type="button" onclick="generateAI()">Generate Puzzle</button>
-            </div>
-
-            <div class="card">
-                <h3>📝 Manual Input</h3>
-                <textarea id="manual-words" placeholder="Words separated by commas..."></textarea>
-                <button type="button" class="alt-btn" onclick="generateManual()">Generate Manual</button>
-            </div>
-
-            <div class="card global-stats">
-                <h3>📊 WordGen Stats</h3>
-                <div class="stat-row"><span>Puzzles Generated:</span> <strong>124,592+</strong></div>
-                <div class="stat-row"><span>Categories:</span> <strong>500+</strong></div>
-                <div class="stat-row"><span>PDF Downloads:</span> <strong>Free</strong></div>
-            </div>
-        </div>
-
-        <div class="puzzle-section">
-            <p id="loading-message" style="display: none;">🤖 AI is generating your puzzle...</p>
-            <div id="print-area" class="puzzle-container" style="display: none;">
-                <div class="puzzle-stats">
-                    <span class="stat-badge" id="stat-size">Size: 12x12</span>
-                    <span class="stat-badge" id="stat-difficulty">Difficulty: Medium</span>
-                    <span class="stat-badge" id="stat-words">Words: 0</span>
+        <div class="main-layout">
+            <div class="controls-section">
+                <div class="card">
+                    <h3>🚂 Generate from Topic</h3>
+                    <input type="text" id="category-input" placeholder="Enter a category (e.g., Space)">
+                    <button type="button" onclick="generateAI()">Generate Puzzle</button>
                 </div>
-                <div id="grid-container" class="grid"></div>
-                <div class="words-wrapper">
-                    <h3>Words to Find:</h3>
-                    <ul id="word-list" class="word-list"></ul>
+
+                <div class="card">
+                    <h3>📝 Manual Input</h3>
+                    <textarea id="manual-words" placeholder="Words separated by commas..."></textarea>
+                    <button type="button" class="alt-btn" onclick="generateManual()">Generate Manual</button>
+                </div>
+
+                <div class="card global-stats">
+                    <h3>📊 WordGen Stats</h3>
+                    <div class="stat-row"><span>Puzzles Generated:</span> <strong>1,000+</strong></div>
+                    <div class="stat-row"><span>Categories:</span> <strong>500+</strong></div>
+                    <div class="stat-row"><span>PDF Downloads:</span> <strong>Free</strong></div>
                 </div>
             </div>
-            <button id="download-btn" class="download-btn" style="display: none;" onclick="downloadPDF()">⬇️ Download as PDF</button>
+
+            <div class="puzzle-section">
+                <p id="loading-message" style="display: none;">Generating your puzzle...</p>
+                <div id="print-area" class="puzzle-container" style="display: none;">
+                    <div class="puzzle-stats">
+                        <span class="stat-badge" id="stat-size">Size: 12x12</span>
+                        <span class="stat-badge" id="stat-difficulty">Difficulty: Medium</span>
+                        <span class="stat-badge" id="stat-words">Words: 0</span>
+                    </div>
+                    <div id="grid-container" class="grid"></div>
+                    <div class="words-wrapper">
+                        <h3>Words to Find:</h3>
+                        <ul id="word-list" class="word-list"></ul>
+                    </div>
+                </div>
+                <div class="action-buttons" style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button id="download-btn" class="download-btn" style="display: none; flex: 1;" onclick="downloadPDF()">⬇️ Download PDF</button>
+                    <button id="play-btn" class="play-btn" style="display: none; flex: 1;" onclick="playOnline()">🎮 Play Online</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/sw.js');
-            });
-        }
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+            .then(reg => console.log('Service Worker registered!'))
+            .catch(err => console.log('Service Worker registration failed:', err));
+        });
+    }
     </script>
 </body>
 </html>

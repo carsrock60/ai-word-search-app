@@ -199,3 +199,47 @@ hr { border: none; border-top: 2px dashed #e2e8f0; margin: 30px 0; }
     color: #475569;
     margin: 0;
 }
+
+/* Play Button on Home Page */
+.play-btn { background: #8b5cf6; }
+.play-btn:hover { background: #7c3aed; }
+
+/* Solve Page UI */
+.solve-hud { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; width: 100%; max-width: 800px; }
+.solve-timer { font-size: 24px; font-weight: 800; color: #1e293b; font-variant-numeric: tabular-nums; }
+.progress-bar-container { flex: 1; margin: 0 20px; background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden; }
+.progress-bar-fill { background: #10b981; height: 100%; width: 0%; transition: width 0.3s ease; }
+.hint-btn { background: #f59e0b; padding: 10px 20px; font-size: 14px; }
+.hint-btn:hover { background: #d97706; }
+
+.solve-layout { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1000px; margin: 0 auto; justify-content: center; align-items: flex-start; }
+.solve-grid-container { flex: 2; min-width: 320px; max-width: 600px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+.solve-words-container { flex: 1; min-width: 250px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+
+.solve-grid { display: grid; gap: 4px; width: 100%; aspect-ratio: 1; user-select: none; }
+.solve-cell { display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: clamp(14px, 4vw, 22px); color: #334155; background: #f8fafc; border-radius: 10%; cursor: pointer; transition: all 0.1s ease; }
+.solve-cell:hover { background: #e2e8f0; }
+
+/* Interactive Game States */
+.solve-cell.selected { background: #93c5fd; color: #1e40af; transform: scale(0.95); }
+.solve-cell.found { background: #10b981; color: white; }
+.solve-cell.glow { animation: pulseGlow 1.5s infinite; background: #fde68a; color: #b45309; }
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.solve-word-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.solve-word-list li { padding: 12px; background: #f1f5f9; border-radius: 8px; font-weight: 700; color: #475569; display: flex; align-items: center; transition: all 0.3s ease; }
+.solve-word-list li::before { content: '◻️'; margin-right: 10px; font-size: 14px; }
+.solve-word-list li.found { background: #d1fae5; color: #065f46; text-decoration: line-through; opacity: 0.6; }
+.solve-word-list li.found::before { content: '✅'; }
+
+/* Win Modal */
+.win-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.win-modal.active { opacity: 1; pointer-events: all; }
+.win-content { background: white; padding: 40px; border-radius: 20px; text-align: center; transform: translateY(20px); transition: transform 0.3s ease; }
+.win-modal.active .win-content { transform: translateY(0); }
+.win-content h2 { font-size: 36px; margin-top: 0; color: #10b981; }
