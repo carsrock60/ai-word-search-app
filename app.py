@@ -52,7 +52,7 @@ def call_ai_chain(prompt):
     # 2. Backup: Gemini Flash Lite 2.5
     if gemini_key:
         try:
-            model = genai.GenerativeModel('gemini-2.5-flash')
+            model = genai.GenerativeModel('gemini-3.5-flash-lite')
             resp = model.generate_content(
                 f"{system_prompt}\n\n{prompt}",
                 generation_config=genai.GenerationConfig(response_mime_type="application/json")
