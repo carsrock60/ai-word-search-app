@@ -3,49 +3,24 @@ import os
 import json
 from datetime import datetime, timezone
 
-# AI Providers
-from groq import Groq
-import google.generativeai as genai
-from openai import OpenAI
-
-# Web Search
-try:
-    from duckduckgo_search import DDGS
-except ImportError:
-    DDGS = None
-
 from word_search import generate_word_search
 
 app = Flask(__name__)
 
-# --- Initialize Clients Gracefully ---
-groq_key = os.environ.get("GROQ_API_KEY")
-groq_client = Groq(api_key=groq_key) if groq_key else None
-
-gemini_key = os.environ.get("GEMINI_API_KEY")
-if gemini_key:
-    try:
-        genai.configure(api_key=gemini_key)
-    except Exception as e:
-        print(f"Gemini config error: {e}")
-
-openai_key = os.environ.get("OPENAI_API_KEY")
-openai_client = OpenAI(api_key=openai_key) if openai_key else None
-
-
-# --- Resilient AI Fallback Chain ---
+# --- Resilient AI Fallback Chain (Lazy Loaded for Vercel) ---
 def call_ai_chain(prompt):
     system_prompt = """You generate word search lists. Respond ONLY in valid JSON format:
     {
-        "needs_search": false,
-        "search_query": "",
         "words": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6", "WORD7", "WORD8", "WORD9", "WORD10"]
     }"""
 
-    # 1. Groq
-    if groq_client:
+    # 1. Primary: Groq
+    groq_key = os.environ.get("GROQ_API_KEY")
+    if groq_key:
         try:
-            completion = groq_client.chat.completions.create(
+            from groq import Groq
+            client = Groq(api_key=groq_key)
+            completion = client.chat.completions.create(
                 model="llama3-70b-8192",
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -56,11 +31,14 @@ def call_ai_chain(prompt):
             )
             return json.loads(completion.choices[0].message.content)
         except Exception as e:
-            print(f"Groq primary failed: {e}")
+            print(f"Groq failed: {e}")
 
-    # 2. Gemini 2.5 Flash
+    # 2. Backup: Gemini 2.5 Flash
+    gemini_key = os.environ.get("GEMINI_API_KEY")
     if gemini_key:
         try:
+            import google.generativeai as genai
+            genai.configure(api_key=gemini_key)
             model = genai.GenerativeModel('gemini-2.5-flash')
             resp = model.generate_content(
                 f"{system_prompt}\n\n{prompt}",
@@ -68,12 +46,15 @@ def call_ai_chain(prompt):
             )
             return json.loads(resp.text)
         except Exception as e:
-            print(f"Gemini fallback failed: {e}")
+            print(f"Gemini failed: {e}")
 
-    # 3. OpenAI GPT-4o-mini
-    if openai_client:
+    # 3. Emergency: OpenAI GPT-4o-mini
+    openai_key = os.environ.get("OPENAI_API_KEY")
+    if openai_key:
         try:
-            completion = openai_client.chat.completions.create(
+            from openai import OpenAI
+            client = OpenAI(api_key=openai_key)
+            completion = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -84,26 +65,12 @@ def call_ai_chain(prompt):
             )
             return json.loads(completion.choices[0].message.content)
         except Exception as e:
-            print(f"OpenAI fallback failed: {e}")
+            print(f"OpenAI failed: {e}")
 
-    # Fallback default list if all API keys fail or are missing
+    # 4. Ultimate Failsafe (If all APIs are down)
     return {
-        "needs_search": False,
         "words": ["SPACE", "GALAXY", "PLANET", "ROCKET", "COMET", "METEOR", "ASTEROID", "ORBIT", "GRAVITY", "NEBULA"]
     }
-
-
-# --- Safe Web Search Helper ---
-def safe_search(query):
-    if not DDGS:
-        return ""
-    try:
-        results = DDGS().text(query, max_results=3)
-        if results:
-            return " ".join([r.get('body', '') for r in results if r.get('body')])
-    except Exception as e:
-        print(f"Web search skipped: {e}")
-    return ""
 
 
 # --- Routes ---
@@ -153,16 +120,9 @@ def generate_ai():
         category = data.get('category', 'General')
         size = int(data.get('size', 12))
 
-        # Check topic
-        initial_prompt = f"Topic: '{category}'. Generate 10 uppercase single words related to this topic."
-        ai_resp = call_ai_chain(initial_prompt)
-
-        # Agentic Web Search Fallback if required
-        if ai_resp.get("needs_search") and ai_resp.get("search_query"):
-            context = safe_search(ai_resp.get("search_query"))
-            if context:
-                context_prompt = f"Topic: '{category}'. Context: {context}. Generate 10 uppercase single words."
-                ai_resp = call_ai_chain(context_prompt)
+        # Request words from AI
+        prompt = f"Topic: '{category}'. Generate 10 uppercase single words related to this topic."
+        ai_resp = call_ai_chain(prompt)
 
         words = [w.strip().upper() for w in ai_resp.get("words", []) if isinstance(w, str) and w.strip()]
         if not words:
@@ -180,7 +140,7 @@ def daily_puzzle():
         prompt = f"Date: {today_str}. Generate a hard, unique academic/niche word search topic and 12 long uppercase single words (8-14 letters)."
         
         ai_resp = call_ai_chain(prompt)
-        topic = ai_resp.get("topic", "Astrophysics & Deep Space")
+        topic = ai_resp.get("topic", "Astrophysics & Deep Space") # Note: if model doesn't return topic, falls back to default
         words = [w.strip().upper() for w in ai_resp.get("words", []) if isinstance(w, str) and w.strip()]
         
         if not words:

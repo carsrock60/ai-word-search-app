@@ -1,8 +1,7 @@
 Flask
 groq
-google-genai
+google-generativeai
 openai
-duckduckgo-search
 pydantic
 requests
 Jinja2
