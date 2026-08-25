@@ -21,31 +21,46 @@
         <ul class="nav-links">
             <li><a href="/" class="active">Home</a></li>
             <li><a href="/themes">Themes</a></li>
+            <li><a href="/faq">FAQ</a></li>
             <li><a href="/about">About</a></li>
         </ul>
     </nav>
 
-    <!-- PAGE: HOME -->
-    <div id="page-home" class="page-content active">
-        <header class="hero">
-            <h1>Word Search Generator</h1>
-            <p>Create printable puzzles in seconds.</p>
-        </header>
+    <!-- NEW REDESIGNED HERO -->
+    <div id="page-home" class="page-content active" style="padding: 0;">
+        <div class="hero-redesign">
+            <h1 class="hero-title">🧩 Create Word Searches<br>In Seconds</h1>
+            <p class="hero-subtitle">Generate puzzles from any topic.<br>Solve online or print.</p>
+            <div class="hero-buttons">
+                <button class="primary-btn" onclick="document.getElementById('create-section').scrollIntoView({behavior: 'smooth'})">Start Creating</button>
+                <button class="secondary-btn" onclick="window.location.href='/themes'">Browse Themes</button>
+            </div>
+        </div>
 
-        <div class="main-layout">
+        <!-- NEW DAILY PUZZLE SECTION -->
+        <div class="daily-card-container">
+            <div class="daily-card card">
+                <div class="daily-header">🌟 Today's AI Challenge</div>
+                <h3 style="margin: 0 0 10px 0; font-size: 24px;">
+                    Topic: <span id="daily-theme-name" style="color: #3b82f6;">Loading Today's Challenge...</span>
+                </h3>
+                <p style="color: #64748b; font-size: 16px;">Difficulty: <strong>Hard (15x15)</strong></p>
+                <button id="daily-play-btn" onclick="playDailyPuzzle()" class="play-daily-btn">▶ Play Today's Challenge</button>
+            </div>
+        </div>
+
+        <div class="main-layout" id="create-section">
             <div class="controls-section">
                 <div class="card">
                     <h3>🚂 Generate from Topic</h3>
                     <input type="text" id="category-input" placeholder="Enter a category (e.g., Space)">
                     <button type="button" onclick="generateAI()">Generate Puzzle</button>
                 </div>
-
                 <div class="card">
                     <h3>📝 Manual Input</h3>
                     <textarea id="manual-words" placeholder="Words separated by commas..."></textarea>
                     <button type="button" class="alt-btn" onclick="generateManual()">Generate Manual</button>
                 </div>
-
                 <div class="card global-stats">
                     <h3>📊 WordGen Stats</h3>
                     <div class="stat-row"><span>Puzzles Generated:</span> <strong>1,000+</strong></div>
@@ -68,9 +83,12 @@
                         <ul id="word-list" class="word-list"></ul>
                     </div>
                 </div>
-                <div class="action-buttons" style="display: flex; gap: 15px; margin-top: 30px;">
-                    <button id="download-btn" class="download-btn" style="display: none; flex: 1;" onclick="downloadPDF()">⬇️ Download PDF</button>
-                    <button id="play-btn" class="play-btn" style="display: none; flex: 1;" onclick="playOnline()">🎮 Play Online</button>
+                
+                <!-- NEW ACTION BUTTONS -->
+                <div class="action-buttons" style="display: flex; gap: 10px; width: 100%; max-width: 650px; margin-top: 30px;">
+                    <button id="download-btn" class="download-btn" style="display: none; flex: 1; padding: 12px; font-size: 15px;" onclick="downloadPDF()">⬇️ PDF</button>
+                    <button id="play-btn" class="play-btn" style="display: none; flex: 1.5; padding: 12px; font-size: 15px;" onclick="playOnline()">🎮 Play Online</button>
+                    <button id="share-btn" class="share-btn" style="display: none; flex: 1; padding: 12px; font-size: 15px; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer;" onclick="sharePuzzle()">🔗 Share</button>
                 </div>
             </div>
         </div>

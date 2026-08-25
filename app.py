@@ -96,6 +96,14 @@ def about():
 def solve():
     return render_template('solve.html')
 
+@app.route('/faq')
+def faq():
+    return render_template('faq.html')
+
+@app.route('/puzzle/<payload>')
+def shared_puzzle(payload):
+    return render_template('solve.html', payload=payload)
+
 @app.route('/api/generate-manual', methods=['POST'])
 def generate_manual():
     data = request.get_json()
@@ -145,6 +153,41 @@ def generate_ai():
             
         grid, placed_words, locations = generate_word_search(words, grid_size=size)
         return jsonify({"grid": grid, "words": placed_words, "locations": locations})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+from datetime import datetime, timezone
+
+@app.route('/api/daily-puzzle', methods=['GET'])
+def daily_puzzle():
+    try:
+        # Get current UTC date string (e.g., "2026-08-25")
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        
+        prompt = f"""Date Seed: {today_str}.
+        Task: Invent a unique, highly challenging, advanced educational or niche topic for today's Daily Word Search Challenge.
+        Examples of style: 'Quantum Cryptography', 'Astrophysics & Dark Matter', 'Deep Sea Hydrothermal Vents', 'Renaissance Art History'.
+        Requirements:
+        1. Topic name must be engaging and difficult.
+        2. Generate exactly 12 challenging, long single words (8-14 letters each) related to this topic.
+        3. Respond in pure JSON format with keys 'topic' and 'words'."""
+
+        ai_resp = call_ai_chain(prompt)
+        
+        topic = ai_resp.get("topic", "Advanced Science")
+        words = [w.strip().upper() for w in ai_resp.get("words", []) if w.strip()]
+        
+        # Generate a large, hard 15x15 grid
+        grid, placed_words, locations = generate_word_search(words, grid_size=15)
+        
+        return jsonify({
+            "date": today_str,
+            "topic": topic,
+            "grid": grid,
+            "words": placed_words,
+            "locations": locations
+        })
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -119,6 +119,8 @@ function renderGrid(grid, words) {
     // Using block styling instead of flex to ensure buttons show properly
     if (downloadBtn) downloadBtn.style.display = 'block';
     if (playBtn) playBtn.style.display = 'block';
+
+    document.getElementById('share-btn').style.display = 'block'
 }
 
 // Play Online Integration
@@ -218,4 +220,72 @@ function downloadPDF() {
     };
 
     html2pdf().set(opt).from(printElement).save();
+}
+
+// --- Daily Puzzle & Share Logic ---
+// --- Daily Puzzle Logic ---
+
+let cachedDailyData = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+    const dailyNameEl = document.getElementById('daily-theme-name');
+    if (dailyNameEl) {
+        try {
+            // Fetch today's AI challenge on page load
+            const res = await fetch('/api/daily-puzzle');
+            const data = await res.json();
+            
+            if (data.topic) {
+                cachedDailyData = data;
+                dailyNameEl.textContent = data.topic;
+            } else {
+                dailyNameEl.textContent = "Quantum Computing";
+            }
+        } catch (e) {
+            dailyNameEl.textContent = "Astrophysics & Cosmology";
+        }
+    }
+});
+
+async function playDailyPuzzle() {
+    const btn = document.getElementById('daily-play-btn');
+    if (btn) btn.textContent = "🤖 Loading Daily Challenge...";
+
+    try {
+        let data = cachedDailyData;
+        if (!data) {
+            const res = await fetch('/api/daily-puzzle');
+            data = await res.json();
+        }
+
+        if (data.error) throw new Error(data.error);
+
+        // Store daily puzzle in LocalStorage and launch solver
+        localStorage.setItem('wordgen_grid', JSON.stringify(data.grid));
+        localStorage.setItem('wordgen_words', JSON.stringify(data.words));
+        localStorage.setItem('wordgen_locations', JSON.stringify(data.locations));
+        localStorage.setItem('wordgen_theme', `Daily: ${data.topic}`);
+        
+        window.location.href = '/solve';
+    } catch (err) {
+        alert("Could not load Daily Puzzle: " + err.message);
+        if (btn) btn.textContent = "▶ Play Today's Challenge";
+    }
+}
+
+function sharePuzzle() {
+    if (!currentWords || currentWords.length === 0) return;
+    try {
+        const payloadStr = JSON.stringify({ t: currentTheme, w: currentWords, s: currentSize });
+        const encoded = btoa(encodeURIComponent(payloadStr));
+        const shareUrl = window.location.origin + '/puzzle/' + encoded;
+        
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            alert("🔗 Link copied! Anyone with this link can play this exact puzzle.");
+        }).catch(() => {
+            prompt("Copy this link to share:", shareUrl);
+        });
+    } catch (e) {
+        alert("Could not generate share link.");
+    }
 }

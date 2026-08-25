@@ -11,13 +11,40 @@ let timerInterval;
 
 window.addEventListener('DOMContentLoaded', () => {
     try {
+        if (window.SHARED_PAYLOAD) {
+            // It's a shared link! Decode and fetch the puzzle.
+            const decodedStr = decodeURIComponent(atob(window.SHARED_PAYLOAD));
+            const data = JSON.parse(decodedStr);
+            
+            document.getElementById('solve-title').textContent = (data.t || "Shared") + " Puzzle";
+            
+            fetch('/api/generate-manual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ words: data.w, size: data.s || 12 })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.error) throw new Error(resData.error);
+                puzzleGrid = resData.grid;
+                puzzleWords = resData.words;
+                puzzleLocations = resData.locations;
+                size = resData.grid.length;
+                initGame();
+            })
+            .catch(e => {
+                alert("Failed to load shared puzzle.");
+                window.location.href = '/';
+            });
+            return;
+        }
+
+        // --- Standard LocalStorage Load (Not Shared) ---
         const gridData = localStorage.getItem('wordgen_grid');
         const wordsData = localStorage.getItem('wordgen_words');
         const locData = localStorage.getItem('wordgen_locations');
 
         if (!gridData || !wordsData || !locData) {
-            console.warn('No puzzle data found in LocalStorage. Redirecting home...');
-            alert('No active puzzle found! Please generate a puzzle on the Home page first.');
             window.location.href = '/';
             return;
         }
@@ -25,19 +52,10 @@ window.addEventListener('DOMContentLoaded', () => {
         puzzleGrid = JSON.parse(gridData);
         puzzleWords = JSON.parse(wordsData);
         puzzleLocations = JSON.parse(locData);
-
-        if (!puzzleGrid || puzzleGrid.length === 0) {
-            alert('Puzzle data invalid! Please generate a new puzzle.');
-            window.location.href = '/';
-            return;
-        }
-
         size = puzzleGrid.length;
         initGame();
 
     } catch (err) {
-        console.error('Error loading puzzle:', err);
-        alert('An error occurred loading the puzzle. Redirecting home.');
         window.location.href = '/';
     }
 });

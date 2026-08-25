@@ -7,6 +7,10 @@
     <link rel="icon" type="image/png" href="/static/logo.png">
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        // Passes the URL payload from Flask to JavaScript!
+        window.SHARED_PAYLOAD = "{{ payload | default('') }}";
+    </script>
     <script src="/static/solve.js"></script>
 </head>
 <body>
