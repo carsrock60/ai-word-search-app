@@ -38,7 +38,7 @@ def call_ai_chain(prompt):
     if groq_client and os.environ.get("GROQ_API_KEY"):
         try:
             completion = groq_client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="openai/gpt-oss-20b",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
@@ -92,17 +92,17 @@ def themes():
 def about():
     return render_template('about.html')
 
-@app.route('/solve')
-def solve():
-    return render_template('solve.html')
-
-@app.route('/faq')
-def faq():
-    return render_template('faq.html')
+@app.route('/create')
+def create():
+    return render_template('create.html')
 
 @app.route('/puzzle/<payload>')
 def shared_puzzle(payload):
     return render_template('solve.html', payload=payload)
+
+@app.route('/faq')
+def faq():
+    return render_template('faq.html')
 
 @app.route('/api/generate-manual', methods=['POST'])
 def generate_manual():

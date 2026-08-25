@@ -277,3 +277,22 @@ hr { border: none; border-top: 2px dashed #e2e8f0; margin: 30px 0; }
 .faq-item { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
 .faq-item h3 { margin-top: 0; color: #1e293b; font-size: 20px; }
 .faq-item p { color: #475569; margin-bottom: 0; line-height: 1.6; }
+
+/* Remove solid green background, just darken the text for found words */
+.solve-cell.found {
+    background: transparent !important;
+    color: #064e3b !important; /* Dark green text */
+    font-weight: 900;
+}
+
+/* Pause Game Blur Effect */
+.paused-blur {
+    filter: blur(10px);
+    pointer-events: none;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.pause-btn { background: #3b82f6; padding: 10px 18px; font-size: 14px; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; }
+.pause-btn:hover { background: #2563eb; }
+.pause-btn.active { background: #10b981; }

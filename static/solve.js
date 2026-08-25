@@ -2,13 +2,126 @@ let puzzleGrid = [];
 let puzzleWords = [];
 let puzzleLocations = {};
 let foundWords = new Set();
-
 let firstTap = null;
 let size = 12;
 
-let startTime;
-let timerInterval;
+// Fixed Timer State
+let elapsedSeconds = 0;
+let isPaused = false;
+let timerInterval = null;
 
+window.addEventListener('DOMContentLoaded', () => {
+    if (!window.SHARED_PAYLOAD) {
+        alert("No puzzle loaded. Redirecting to Create page.");
+        window.location.href = '/create';
+        return;
+    }
+
+    // Decode and fetch puzzle
+    const decodedStr = decodeURIComponent(atob(window.SHARED_PAYLOAD));
+    const data = JSON.parse(decodedStr);
+    
+    document.getElementById('solve-title').textContent = (data.t || "Custom") + " Puzzle";
+    
+    fetch('/api/generate-manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ words: data.w, size: data.s || 12 })
+    })
+    .then(res => res.json())
+    .then(resData => {
+        if (resData.error) throw new Error(resData.error);
+        puzzleGrid = resData.grid;
+        puzzleWords = resData.words;
+        puzzleLocations = resData.locations;
+        size = resData.grid.length;
+        initGame();
+    })
+    .catch(() => {
+        alert("Failed to load puzzle.");
+        window.location.href = '/create';
+    });
+});
+
+function initGame() {
+    renderSolveGrid();
+    renderSolveWords();
+    updateProgress();
+    
+    elapsedSeconds = 0;
+    isPaused = false;
+    document.getElementById('timer').textContent = "00:00";
+    
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    if (isPaused) return; // Completely skips the increment if paused
+    
+    elapsedSeconds++;
+    let m = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+    let s = (elapsedSeconds % 60).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = `${m}:${s}`;
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    const btn = document.getElementById('pause-btn');
+    const container = document.getElementById('print-area');
+    
+    if (isPaused) {
+        btn.innerHTML = '▶ Resume';
+        btn.classList.add('active');
+        container.classList.add('paused-blur');
+        // Stop the JS interval completely to save CPU
+        clearInterval(timerInterval); 
+    } else {
+        btn.innerHTML = '⏸ Pause';
+        btn.classList.remove('active');
+        container.classList.remove('paused-blur');
+        // Restart the interval
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+}
+
+// Ensure you clear the SVG lines when rendering the grid!
+// Update your renderSolveGrid() function to include this line:
+function renderSolveGrid() {
+    const container = document.getElementById('solve-grid');
+    const svgLines = document.getElementById('solve-lines');
+    if (svgLines) svgLines.innerHTML = ''; // Clear previous lines
+    
+    // ... rest of your existing renderSolveGrid code ...
+}
+
+// Add the visual SVG Highlighter Line Function
+function drawStrikethrough(coords) {
+    const svg = document.getElementById('solve-lines');
+    if (!svg) return;
+
+    const start = coords[0];
+    const end = coords[coords.length - 1];
+
+    // Using percentages so the lines scale perfectly on phones and desktops!
+    const x1 = ((start[1] + 0.5) / size) * 100;
+    const y1 = ((start[0] + 0.5) / size) * 100;
+    const x2 = ((end[1] + 0.5) / size) * 100;
+    const y2 = ((end[0] + 0.5) / size) * 100;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', `${x1}`);
+    line.setAttribute('y1', `${y1}`);
+    line.setAttribute('x2', `${x2}`);
+    line.setAttribute('y2', `${y2}`);
+    
+    // Transparent bright green highlighter stroke
+    line.setAttribute('stroke', 'rgba(16, 185, 129, 0.45)'); 
+    line.setAttribute('stroke-width', `${100 / size * 0.6}`); // 60% of cell width
+    line.setAttribute('stroke-linecap', 'round');
+    
+    svg.appendChild(line);
+}
 window.addEventListener('DOMContentLoaded', () => {
     try {
         if (window.SHARED_PAYLOAD) {
@@ -125,11 +238,16 @@ function handleCellClick(r, c) {
         if (match) {
             foundWords.add(match.word);
             
+            // Highlight text slightly
             match.coords.forEach(coord => {
                 const cell = document.getElementById(`cell-${coord[0]}-${coord[1]}`);
                 if (cell) cell.classList.add('found');
             });
             
+            // DRAW THE HIGHLIGHTER LINE!
+            drawStrikethrough(match.coords);
+            
+            // Strike through the word list
             const wordLi = document.getElementById(`word-${match.word}`);
             if (wordLi) wordLi.classList.add('found');
 

@@ -1,6 +1,6 @@
 Flask
 groq
-google-generativeai
+google-genai
 openai
 duckduckgo-search
 pydantic

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordGen | Create Puzzle</title>
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/static/script.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo" style="text-decoration: none;">🧩 WordGen</a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/create" class="active">Create</a></li>
+            <li><a href="/themes">Themes</a></li>
+            <li><a href="/faq">FAQ</a></li>
+            <li><a href="/about">About</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-content active" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+        <h1 style="text-align: center; margin-top: 10px; margin-bottom: 25px;">Word Search Creator</h1>
+
+        <div class="main-layout" style="display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start;">
+            <!-- LEFT: Controls -->
+            <div class="controls-section" style="flex: 1; min-width: 300px;">
+                <div class="card">
+                    <h3>🚂 Generate from Topic</h3>
+                    <input type="text" id="category-input" placeholder="Enter a category (e.g., Space)">
+                    <button type="button" onclick="generateAI()">Generate Puzzle</button>
+                </div>
+                <div class="card" style="margin-top: 20px;">
+                    <h3>📝 Manual Input</h3>
+                    <textarea id="manual-words" placeholder="Words separated by commas..."></textarea>
+                    <button type="button" class="alt-btn" onclick="generateManual()">Generate Manual</button>
+                </div>
+            </div>
+
+            <!-- RIGHT: Preview & Export -->
+            <div class="puzzle-section" style="flex: 2; min-width: 320px; display: flex; flex-direction: column; align-items: center;">
+                <p id="loading-message" style="display: none; font-size: 18px; font-weight: bold; color: #3b82f6;">Generating your puzzle...</p>
+
+                <!-- Static Preview Container -->
+                <div id="print-area" class="puzzle-container" style="display: none; width: 100%; max-width: 650px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+                    <div class="puzzle-stats" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+                        <span class="stat-badge" id="stat-size">Size: 12x12</span>
+                        <span class="stat-badge" id="stat-words">Words: 0</span>
+                    </div>
+                    
+                    <div id="grid-container" class="grid"></div>
+                    
+                    <div class="words-wrapper" style="margin-top: 25px; text-align: center;">
+                        <h3>Words to Find:</h3>
+                        <ul id="word-list" class="word-list" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; list-style: none; padding: 0;"></ul>
+                    </div>
+                </div>
+
+                <!-- Export Actions -->
+                <div class="action-buttons" style="display: flex; gap: 15px; width: 100%; max-width: 650px; margin-top: 20px;">
+                    <button id="download-btn" class="download-btn" style="display: none; flex: 1; padding: 14px; font-size: 16px;" onclick="downloadPDF()">⬇️ Download PDF</button>
+                    <button id="share-btn" class="share-btn" style="display: none; flex: 1; padding: 14px; font-size: 16px; background: #ec4899; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;" onclick="sharePuzzle()">🎮 Get Play Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

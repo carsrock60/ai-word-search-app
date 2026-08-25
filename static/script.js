@@ -98,29 +98,32 @@ function renderGrid(grid, words) {
     });
 
     const wordList = document.getElementById('word-list');
-    wordList.innerHTML = '';
-    words.forEach(word => {
-        const li = document.createElement('li');
-        li.textContent = word;
-        wordList.appendChild(li);
-    });
+    if (wordList) {
+        wordList.innerHTML = '';
+        words.forEach(word => {
+            const li = document.createElement('li');
+            li.textContent = word;
+            wordList.appendChild(li);
+        });
+    }
 
-    // Update Stats
-    document.getElementById('stat-size').textContent = `Size: ${currentSize}x${currentSize}`;
-    document.getElementById('stat-difficulty').textContent = `Difficulty: ${currentDifficulty}`;
-    document.getElementById('stat-words').textContent = `Words: ${words.length}`;
+    // Safely update stats if they exist on the page
+    const statSize = document.getElementById('stat-size');
+    const statDiff = document.getElementById('stat-difficulty');
+    const statWords = document.getElementById('stat-words');
 
-    // Show puzzle and buttons
-    document.getElementById('print-area').style.display = 'block';
-    
+    if (statSize) statSize.textContent = `Size: ${currentSize}x${currentSize}`;
+    if (statDiff) statDiff.textContent = `Difficulty: ${currentDifficulty}`;
+    if (statWords) statWords.textContent = `Words: ${words.length}`;
+
+    // Show puzzle and action buttons
+    const printArea = document.getElementById('print-area');
     const downloadBtn = document.getElementById('download-btn');
-    const playBtn = document.getElementById('play-btn');
-    
-    // Using block styling instead of flex to ensure buttons show properly
-    if (downloadBtn) downloadBtn.style.display = 'block';
-    if (playBtn) playBtn.style.display = 'block';
+    const shareBtn = document.getElementById('share-btn');
 
-    document.getElementById('share-btn').style.display = 'block'
+    if (printArea) printArea.style.display = 'block';
+    if (downloadBtn) downloadBtn.style.display = 'block';
+    if (shareBtn) shareBtn.style.display = 'block';
 }
 
 // Play Online Integration
@@ -249,26 +252,20 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 async function playDailyPuzzle() {
     const btn = document.getElementById('daily-play-btn');
-    if (btn) btn.textContent = "🤖 Loading Daily Challenge...";
+    if (btn) btn.textContent = "Generating Hard Daily Challenge...";
 
     try {
-        let data = cachedDailyData;
-        if (!data) {
-            const res = await fetch('/api/daily-puzzle');
-            data = await res.json();
-        }
-
+        const res = await fetch('/api/daily-puzzle');
+        const data = await res.json();
         if (data.error) throw new Error(data.error);
 
-        // Store daily puzzle in LocalStorage and launch solver
-        localStorage.setItem('wordgen_grid', JSON.stringify(data.grid));
-        localStorage.setItem('wordgen_words', JSON.stringify(data.words));
-        localStorage.setItem('wordgen_locations', JSON.stringify(data.locations));
-        localStorage.setItem('wordgen_theme', `Daily: ${data.topic}`);
+        // Generate the URL payload for the daily puzzle
+        const payloadStr = JSON.stringify({ t: "Daily Challenge: " + data.topic, w: data.words, s: 15 });
+        const encoded = btoa(encodeURIComponent(payloadStr));
         
-        window.location.href = '/solve';
+        window.location.href = '/puzzle/' + encoded;
     } catch (err) {
-        alert("Could not load Daily Puzzle: " + err.message);
+        alert("Could not load Daily Puzzle.");
         if (btn) btn.textContent = "▶ Play Today's Challenge";
     }
 }
@@ -280,12 +277,16 @@ function sharePuzzle() {
         const encoded = btoa(encodeURIComponent(payloadStr));
         const shareUrl = window.location.origin + '/puzzle/' + encoded;
         
+        // Open the game immediately in a new tab for the user to play!
+        window.open(shareUrl, '_blank');
+        
+        // Also copy it to their clipboard so they can send to friends
         navigator.clipboard.writeText(shareUrl).then(() => {
-            alert("🔗 Link copied! Anyone with this link can play this exact puzzle.");
+            alert("🔗 Play Link opened in a new tab, and copied to your clipboard!");
         }).catch(() => {
-            prompt("Copy this link to share:", shareUrl);
+            prompt("Copy this link to share/play:", shareUrl);
         });
     } catch (e) {
-        alert("Could not generate share link.");
+        alert("Could not generate play link.");
     }
 }
