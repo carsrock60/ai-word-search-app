@@ -3,7 +3,7 @@ const ASSETS_TO_CACHE = [
   '/',
   '/static/style.css',
   '/static/script.js',
-  '/static/favicon.svg',
+  '/static/logo.svg',
   '/static/manifest.json'
 ];
 
