@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import os
 import json
+from datetime import datetime, timezone
 
 # AI Providers
 from groq import Groq
@@ -8,61 +9,69 @@ import google.generativeai as genai
 from openai import OpenAI
 
 # Web Search
-from duckduckgo_search import DDGS
+try:
+    from duckduckgo_search import DDGS
+except ImportError:
+    DDGS = None
 
 from word_search import generate_word_search
 
 app = Flask(__name__)
 
-# --- Initialize AI Clients (Graceful Failures if missing) ---
-groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY", "dummy")) if os.environ.get("GROQ_API_KEY") else None
+# --- Initialize Clients Gracefully ---
+groq_key = os.environ.get("GROQ_API_KEY")
+groq_client = Groq(api_key=groq_key) if groq_key else None
 
 gemini_key = os.environ.get("GEMINI_API_KEY")
 if gemini_key:
-    genai.configure(api_key=gemini_key)
+    try:
+        genai.configure(api_key=gemini_key)
+    except Exception as e:
+        print(f"Gemini config error: {e}")
 
-openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "dummy")) if os.environ.get("OPENAI_API_KEY") else None
+openai_key = os.environ.get("OPENAI_API_KEY")
+openai_client = OpenAI(api_key=openai_key) if openai_key else None
 
 
-# --- The Fallback AI Chain ---
+# --- Resilient AI Fallback Chain ---
 def call_ai_chain(prompt):
-    """Tries Groq -> Gemini -> OpenAI in order."""
-    system_prompt = """You generate word search lists. Respond in pure JSON format:
+    system_prompt = """You generate word search lists. Respond ONLY in valid JSON format:
     {
-        "needs_search": boolean,
-        "search_query": "string (the google search query if needs_search is true, else empty)",
-        "words": ["list", "of", "up", "to", "10", "single", "words"]
+        "needs_search": false,
+        "search_query": "",
+        "words": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5", "WORD6", "WORD7", "WORD8", "WORD9", "WORD10"]
     }"""
-    
-    # 1. Primary: Groq (Fastest)
-    if groq_client and os.environ.get("GROQ_API_KEY"):
+
+    # 1. Groq
+    if groq_client:
         try:
             completion = groq_client.chat.completions.create(
-                model="openai/gpt-oss-20b",
+                model="llama3-70b-8192",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
+                timeout=10
             )
             return json.loads(completion.choices[0].message.content)
         except Exception as e:
-            print(f"Groq failed: {e}")
+            print(f"Groq primary failed: {e}")
 
-    # 2. Backup: Gemini Flash Lite 2.5
+    # 2. Gemini 2.5 Flash
     if gemini_key:
         try:
-            model = genai.GenerativeModel('gemini-3.5-flash-lite')
+            model = genai.GenerativeModel('gemini-2.5-flash')
             resp = model.generate_content(
                 f"{system_prompt}\n\n{prompt}",
                 generation_config=genai.GenerationConfig(response_mime_type="application/json")
             )
             return json.loads(resp.text)
         except Exception as e:
-            print(f"Gemini failed: {e}")
+            print(f"Gemini fallback failed: {e}")
 
-    # 3. Emergency: OpenAI (GPT-4.1-nano equivalent)
-    if openai_client and os.environ.get("OPENAI_API_KEY"):
+    # 3. OpenAI GPT-4o-mini
+    if openai_client:
         try:
             completion = openai_client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -70,13 +79,31 @@ def call_ai_chain(prompt):
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
+                timeout=10
             )
             return json.loads(completion.choices[0].message.content)
         except Exception as e:
-            print(f"OpenAI failed: {e}")
-            
-    raise Exception("All AI models failed. Please try again later.")
+            print(f"OpenAI fallback failed: {e}")
+
+    # Fallback default list if all API keys fail or are missing
+    return {
+        "needs_search": False,
+        "words": ["SPACE", "GALAXY", "PLANET", "ROCKET", "COMET", "METEOR", "ASTEROID", "ORBIT", "GRAVITY", "NEBULA"]
+    }
+
+
+# --- Safe Web Search Helper ---
+def safe_search(query):
+    if not DDGS:
+        return ""
+    try:
+        results = DDGS().text(query, max_results=3)
+        if results:
+            return " ".join([r.get('body', '') for r in results if r.get('body')])
+    except Exception as e:
+        print(f"Web search skipped: {e}")
+    return ""
 
 
 # --- Routes ---
@@ -84,103 +111,82 @@ def call_ai_chain(prompt):
 def index():
     return render_template('index.html')
 
-@app.route('/themes')
-def themes():
-    return render_template('themes.html')
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
 @app.route('/create')
 def create():
     return render_template('create.html')
 
-@app.route('/puzzle/<payload>')
-def shared_puzzle(payload):
-    return render_template('solve.html', payload=payload)
+@app.route('/themes')
+def themes():
+    return render_template('themes.html')
 
 @app.route('/faq')
 def faq():
     return render_template('faq.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/puzzle/<payload>')
+def shared_puzzle(payload):
+    return render_template('solve.html', payload=payload)
+
 @app.route('/api/generate-manual', methods=['POST'])
 def generate_manual():
-    data = request.get_json()
-    words = data.get('words', [])
-    size = int(data.get('size', 12))
-    
-    if not words: 
-        return jsonify({"error": "No words provided"}), 400
-        
-    grid, placed_words, locations = generate_word_search(words, grid_size=size)
-    return jsonify({"grid": grid, "words": placed_words, "locations": locations})
-
-@app.route('/api/generate-ai', methods=['POST'])
-def generate_ai():
-    data = request.get_json()
-    category = data.get('category', '')
-    size = int(data.get('size', 12))
-    
-    if not category: 
-        return jsonify({"error": "No category provided"}), 400
-
     try:
-        # Phase 1: Ask AI if it knows the topic or needs to search
-        initial_prompt = f"Topic: '{category}'. If this is a very niche/obscure topic where you might guess wrong, set 'needs_search' to true and provide a 'search_query'. Otherwise set 'needs_search' to false and generate 10 single words."
+        data = request.get_json() or {}
+        words = data.get('words', [])
+        size = int(data.get('size', 12))
         
-        ai_resp = call_ai_chain(initial_prompt)
-        
-        # Phase 2: Agentic Web Search Fallback
-        if ai_resp.get("needs_search"):
-            print(f"Topic is niche! Searching web for: {ai_resp.get('search_query')}")
-            query = ai_resp.get("search_query", category)
-            try:
-                # DuckDuckGo free search
-                results = DDGS().text(query, max_results=3)
-                context = " ".join([r['body'] for r in results])
-            except Exception as e:
-                context = "Could not fetch web results."
-            
-            # Re-prompt the AI with the live web context
-            context_prompt = f"Topic: '{category}'. Here is web context: {context}. Generate 10 accurate single words based on this context. Set needs_search to false."
-            ai_resp = call_ai_chain(context_prompt)
-
-        # Clean the words and generate grid
-        words = [w.strip().upper() for w in ai_resp.get("words", []) if w.strip()]
-        if not words:
-            raise Exception("AI failed to generate words.")
+        if not words: 
+            return jsonify({"error": "No words provided"}), 400
             
         grid, placed_words, locations = generate_word_search(words, grid_size=size)
         return jsonify({"grid": grid, "words": placed_words, "locations": locations})
-        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-from datetime import datetime, timezone
+@app.route('/api/generate-ai', methods=['POST'])
+def generate_ai():
+    try:
+        data = request.get_json() or {}
+        category = data.get('category', 'General')
+        size = int(data.get('size', 12))
+
+        # Check topic
+        initial_prompt = f"Topic: '{category}'. Generate 10 uppercase single words related to this topic."
+        ai_resp = call_ai_chain(initial_prompt)
+
+        # Agentic Web Search Fallback if required
+        if ai_resp.get("needs_search") and ai_resp.get("search_query"):
+            context = safe_search(ai_resp.get("search_query"))
+            if context:
+                context_prompt = f"Topic: '{category}'. Context: {context}. Generate 10 uppercase single words."
+                ai_resp = call_ai_chain(context_prompt)
+
+        words = [w.strip().upper() for w in ai_resp.get("words", []) if isinstance(w, str) and w.strip()]
+        if not words:
+            words = ["PUZZLE", "GENERATE", "SEARCH", "WORD", "SOLVE"]
+
+        grid, placed_words, locations = generate_word_search(words, grid_size=size)
+        return jsonify({"grid": grid, "words": placed_words, "locations": locations})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/daily-puzzle', methods=['GET'])
 def daily_puzzle():
     try:
-        # Get current UTC date string (e.g., "2026-08-25")
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        prompt = f"Date: {today_str}. Generate a hard, unique academic/niche word search topic and 12 long uppercase single words (8-14 letters)."
         
-        prompt = f"""Date Seed: {today_str}.
-        Task: Invent a unique, highly challenging, advanced educational or niche topic for today's Daily Word Search Challenge.
-        Examples of style: 'Quantum Cryptography', 'Astrophysics & Dark Matter', 'Deep Sea Hydrothermal Vents', 'Renaissance Art History'.
-        Requirements:
-        1. Topic name must be engaging and difficult.
-        2. Generate exactly 12 challenging, long single words (8-14 letters each) related to this topic.
-        3. Respond in pure JSON format with keys 'topic' and 'words'."""
-
         ai_resp = call_ai_chain(prompt)
+        topic = ai_resp.get("topic", "Astrophysics & Deep Space")
+        words = [w.strip().upper() for w in ai_resp.get("words", []) if isinstance(w, str) and w.strip()]
         
-        topic = ai_resp.get("topic", "Advanced Science")
-        words = [w.strip().upper() for w in ai_resp.get("words", []) if w.strip()]
-        
-        # Generate a large, hard 15x15 grid
+        if not words:
+            words = ["ASTROPHYSICS", "GRAVITATIONAL", "EXOPLANET", "SUPERNOVA", "SINGULARITY", "SPECTROSCOPY"]
+
         grid, placed_words, locations = generate_word_search(words, grid_size=15)
-        
         return jsonify({
             "date": today_str,
             "topic": topic,
@@ -188,7 +194,6 @@ def daily_puzzle():
             "words": placed_words,
             "locations": locations
         })
-        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
